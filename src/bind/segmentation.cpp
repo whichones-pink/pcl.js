@@ -1,6 +1,7 @@
 #include <pcl/pcl_config.h>
 #include <pcl/segmentation/min_cut_segmentation.h>
 #include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/segmentation/region_growing.h>
 
 #include "embind.hpp"
 
@@ -32,6 +33,39 @@ using namespace emscripten;
           .function("getMaxFlow", &pcl::MinCutSegmentation<PointT>::getMaxFlow)                   \
           .function("getColoredCloud", &pcl::MinCutSegmentation<PointT>::getColoredCloud);
 
+#define BIND_RegionGrowing(r, data, PointT)                                                 \
+  class_<pcl::RegionGrowing<PointT, Normal>, base<pcl::PCLBase<PointT>>>(           \
+      "RegionGrowing" BOOST_PP_STRINGIZE(PointT))                                              \
+          .constructor<>()                                                                   \
+          .function("setMinClusterSize", &pcl::RegionGrowing<PointT, Normal>::setMinClusterSize)                 \
+          .function("getMinClusterSize", &pcl::RegionGrowing<PointT, Normal>::getMinClusterSize)               \
+          .function("setMaxClusterSize", &pcl::RegionGrowing<PointT, Normal>::setMaxClusterSize) \
+          .function("getMaxClusterSize", &pcl::RegionGrowing<PointT, Normal>::getMaxClusterSize)         \
+          .function("setSmoothModeFlag", &pcl::RegionGrowing<PointT, Normal>::setSmoothModeFlag)             \
+          .function("getSmoothModeFlag", &pcl::RegionGrowing<PointT, Normal>::getSmoothModeFlag)           \
+          .function("setCurvatureTestFlag", &pcl::RegionGrowing<PointT, Normal>::setCurvatureTestFlag)       \
+          .function("getCurvatureTestFlag", &pcl::RegionGrowing<PointT, Normal>::getCurvatureTestFlag) \
+          .function("setResidualTestFlag",                                                   \
+                    &pcl::RegionGrowing<PointT, Normal>::setResidualTestFlag)                      \
+          .function("getResidualTestFlag", &pcl::RegionGrowing<PointT, Normal>::getResidualTestFlag) \
+          .function("setSmoothnessThreshold", &pcl::RegionGrowing<PointT, Normal>::setSmoothnessThreshold)                 \
+          .function("getSmoothnessThreshold", &pcl::RegionGrowing<PointT, Normal>::getSmoothnessThreshold)               \
+          .function("setResidualThreshold", &pcl::RegionGrowing<PointT, Normal>::setResidualThreshold) \
+          .function("getResidualThreshold", &pcl::RegionGrowing<PointT, Normal>::getResidualThreshold)         \
+          .function("setCurvatureThreshold", &pcl::RegionGrowing<PointT, Normal>::setCurvatureThreshold)             \
+          .function("getCurvatureThreshold", &pcl::RegionGrowing<PointT, Normal>::getCurvatureThreshold)           \
+          .function("setSearchMethod", &pcl::RegionGrowing<PointT, Normal>::setSearchMethod)       \
+          .function("getSearchMethod", &pcl::RegionGrowing<PointT, Normal>::getSearchMethod) \
+          .function("setNumberOfNeighbours",                                                   \
+                    &pcl::RegionGrowing<PointT, Normal>::setNumberOfNeighbours)                      \
+          .function("getNumberOfNeighbours", &pcl::RegionGrowing<PointT, Normal>::getNumberOfNeighbours) \
+          .function("setInputNormals",                                                   \
+                              &pcl::RegionGrowing<PointT, Normal>::setInputNormals)                      \
+          .function("getInputNormals", &pcl::RegionGrowing<PointT, Normal>::getInputNormals) \
+          .function("extract", &pcl::RegionGrowing<PointT, Normal>::extract, allow_raw_pointers())   \
+          .function("getColoredCloud", &pcl::RegionGrowing<PointT, Normal>::getColoredCloud);
+
+
 #define BIND_SACSegmentation(r, data, PointT)                                                 \
   class_<pcl::SACSegmentation<PointT>, base<pcl::PCLBase<PointT>>>(                              \
       "SACSegmentation" BOOST_PP_STRINGIZE(PointT))                                              \
@@ -52,6 +86,8 @@ EMSCRIPTEN_BINDINGS(segmentation) {
   BOOST_PP_SEQ_FOR_EACH(BIND_MinCutSegmentation, , XYZ_POINT_TYPES);
 
   BOOST_PP_SEQ_FOR_EACH(BIND_SACSegmentation, , (PointXYZ));
+
+  BOOST_PP_SEQ_FOR_EACH(BIND_RegionGrowing, , (PointXYZ));
 
   register_vector<PointIndices>("VectorPointIndices");
 }
